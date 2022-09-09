@@ -120,6 +120,26 @@ class StarcraftClientProcessor(ClientCommandProcessor):
             sc2_logger.warning("When using set_path, you must type the path to your SC2 install directory.")
         return False
 
+    def _cmd_save(self) -> bool:
+        """Save currently running mission as a quicksave."""
+        if self.ctx.sc2_run_task and not self.ctx.sc2_run_task.done() and self.ctx.last_bot:
+            asyncio.create_task(self.ctx.last_bot.save()).add_done_callback(
+                lambda task: self.output("Quicksave created.")
+            )
+            return True
+        self.output("No mission is running that could be saved.")
+        return False
+
+    def _cmd_load(self) -> bool:
+        """Load last quicksave if one exists."""
+        if self.ctx.sc2_run_task and not self.ctx.sc2_run_task.done() \
+                and self.ctx.last_bot and self.ctx.last_bot.has_savegame:
+            asyncio.create_task(self.ctx.last_bot.load()).add_done_callback(
+                lambda task: self.output("Quicksave loaded.")
+            )
+            return True
+        self.output("No quicksave to load found.")
+        return False
 
 class SC2Context(CommonContext):
     command_processor = StarcraftClientProcessor
@@ -136,10 +156,12 @@ class SC2Context(CommonContext):
     difficulty_override = -1
     mission_id_to_location_ids: typing.Dict[int, typing.List[int]] = {}
     raw_text_parser: RawJSONtoTextParser
+    last_bot: typing.Optional[ArchipelagoBot]
 
     def __init__(self, *args, **kwargs):
         super(SC2Context, self).__init__(*args, **kwargs)
         self.raw_text_parser = RawJSONtoTextParser(self)
+        self.last_bot = None
 
     async def server_auth(self, password_requested: bool = False):
         if password_requested and not self.password:
@@ -502,7 +524,7 @@ class ArchipelagoBot(sc2.bot_ai.BotAI):
     setup_done: bool
     ctx: SC2Context
     mission_id: int
-
+    has_savegame = False
     can_read_game = False
 
     last_received_update: int = 0
@@ -512,8 +534,16 @@ class ArchipelagoBot(sc2.bot_ai.BotAI):
         self.ctx = ctx
         self.mission_id = mission_id
         self.boni = [False for _ in range(max_bonus)]
+        ctx.last_bot = self
 
         super(ArchipelagoBot, self).__init__()
+
+    async def save(self):
+        await self._client.quick_save()
+        self.has_savegame = True
+
+    async def load(self):
+        await self._client.quick_load()
 
     async def on_step(self, iteration: int):
         game_state = 0
