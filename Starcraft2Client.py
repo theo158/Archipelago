@@ -524,7 +524,9 @@ class ArchipelagoBot(sc2.bot_ai.BotAI):
     setup_done: bool
     ctx: SC2Context
     mission_id: int
-    has_savegame = False
+    has_savegame: bool = False
+    want_save: bool = False
+    want_load: bool = False
     can_read_game = False
 
     last_received_update: int = 0
@@ -539,13 +541,20 @@ class ArchipelagoBot(sc2.bot_ai.BotAI):
         super(ArchipelagoBot, self).__init__()
 
     async def save(self):
-        await self._client.quick_save()
-        self.has_savegame = True
+        self.want_save = True
 
     async def load(self):
-        await self._client.quick_load()
+        self.want_load = True
 
     async def on_step(self, iteration: int):
+        if self.want_save:
+            self.want_save = False
+            await self._client.quick_save()
+            self.has_savegame = True
+        elif self.want_load:
+            self.want_load = False
+            await self._client.quick_load()
+            return
         game_state = 0
         if not self.setup_done:
             self.setup_done = True
