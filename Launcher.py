@@ -83,6 +83,36 @@ def open_folder(folder_path):
         webbrowser.open(folder_path)
 
 
+def get_tests():
+    """Get Tests to run.
+    In source: we can just walk the directory.
+    In frozen: we use the walked directory to load from embedded zip."""
+    import unittest
+    import os
+    import test
+    import logging
+    path = os.path.relpath(os.path.dirname(test.__file__), ".")
+    logging.info(path)
+    test_suite = unittest.defaultTestLoader.discover("test")
+    logging.info(test_suite)
+    import test.worlds
+    test_suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test.worlds))
+    return test_suite
+
+
+def run_tests():
+    import unittest
+    import logging
+    result = unittest.TestResult()
+    tests: unittest.TestSuite = get_tests()
+    logging.info(f"Tests found: {tests.countTestCases()}")
+    tests.run(result)
+    logging.info(result.errors)
+    logging.info(result.failures)
+    logging.info(result.testsRun)
+    logging.info(f"TestResult: {result}")
+
+
 components.extend([
     # Functions
     Component("Open host.yaml", func=open_host_yaml),
@@ -91,6 +121,7 @@ components.extend([
     Component("Discord Server", icon="discord", func=lambda: webbrowser.open("https://discord.gg/8Z65BR2")),
     Component("18+ Discord Server", icon="discord", func=lambda: webbrowser.open("https://discord.gg/fqvNCCRsu4")),
     Component("Browse Files", func=browse_files),
+    Component(f"Run {get_tests().countTestCases()} Self-Tests", func=run_tests),
 ])
 
 

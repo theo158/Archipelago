@@ -574,12 +574,13 @@ cx_Freeze.setup(
     ext_modules=[],  # required to disable auto-discovery with setuptools>=61
     options={
         "build_exe": {
-            "packages": ["websockets", "worlds", "kivy"],
+            "packages": ["websockets", "worlds", "kivy", "test"],
             "includes": [],
             "excludes": ["numpy", "Cython", "PySide2", "PIL",
                          "pandas"],
             "zip_include_packages": ["*"],
-            "zip_exclude_packages": ["worlds", "sc2"],
+            # test: unittest discover currently only works with folder structures
+            "zip_exclude_packages": ["worlds", "sc2", "test"],
             "include_files": [],  # broken in cx 6.14.0, we use more special sauce now
             "include_msvcr": False,
             "replace_paths": ["*."],
