@@ -19,29 +19,7 @@ from pathlib import Path
 
 
 # This is a bit jank. We need cx-Freeze to be able to run anything from this script, so install it
-try:
-    requirement = 'cx-Freeze==6.14.9'
-    import pkg_resources
-    try:
-        pkg_resources.require(requirement)
-        install_cx_freeze = False
-    except pkg_resources.ResolutionError:
-        install_cx_freeze = True
-except ImportError:
-    install_cx_freeze = True
-    pkg_resources = None  # type: ignore [assignment]
 
-if install_cx_freeze:
-    # check if pip is available
-    try:
-        import pip  # noqa: F401
-    except ImportError:
-        raise RuntimeError("pip not available. Please install pip.")
-    # install and import cx_freeze
-    if '--yes' not in sys.argv and '-y' not in sys.argv:
-        input(f'Requirement {requirement} is not satisfied, press enter to install it')
-    subprocess.call([sys.executable, '-m', 'pip', 'install', requirement, '--upgrade'])
-    import pkg_resources
 
 import cx_Freeze
 

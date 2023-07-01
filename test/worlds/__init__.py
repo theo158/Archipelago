@@ -1,7 +1,6 @@
 def load_tests(loader, standard_tests, pattern):
     import os
     import unittest
-    import Utils
     import typing
     import zipfile
     import importlib
@@ -14,14 +13,14 @@ def load_tests(loader, standard_tests, pattern):
     folders = [(os.path.join(os.path.split(world.__file__)[0], "test"), world.zip_path)
                for world in AutoWorldRegister.world_types.values()]
 
-    all_tests: typing.List[unittest.TestCase] = [
-    ]
-
+    all_tests: typing.List[unittest.TestCase] = []
+    import test
+    top_level = os.path.split(os.path.split(test.__file__)[0])[0]
     for folder, zip_path in folders:
         if os.path.exists(folder) and not zip_path:
             all_tests.extend(
                 test_case
-                for test_collection in loader.discover(folder, top_level_dir=Utils.local_path("."))
+                for test_collection in loader.discover(folder, pattern = "test*.py*", top_level_dir=top_level)
                 for test_suite in test_collection
                 for test_case in test_suite
             )

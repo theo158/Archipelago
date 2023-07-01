@@ -92,9 +92,7 @@ def get_tests():
     import os
     import test
     import logging
-    path = os.path.relpath(os.path.dirname(test.__file__), ".")
-    logging.info(path)
-    test_suite = unittest.defaultTestLoader.discover("test")
+    test_suite = unittest.defaultTestLoader.discover("test", top_level_dir=os.path.split(test.__file__)[0])
     logging.info(test_suite)
     import test.worlds
     test_suite.addTests(unittest.defaultTestLoader.loadTestsFromModule(test.worlds))
