@@ -122,7 +122,16 @@ class ALTTPWeb(WebWorld):
         ["Nyx Edelstein"]
     )
 
-    tutorials = [setup_en, setup_de, setup_es, setup_fr, msu, msu_es, msu_fr, plando, oof_sound]
+    oof_sound_fr = Tutorial(
+        "Guide de customisation du son 'OOF'",
+        "Un guide pour changer le son que fait Link quand il prend des dégâts",
+        "Français",
+        "oof_sound_fr.md",
+        "oof_sound/fr",
+        ["Raguna Loire"]
+    )
+
+    tutorials = [setup_en, setup_de, setup_es, setup_fr, msu, msu_es, msu_fr, plando, oof_sound, oof_sound_fr]
 
 
 class ALTTPWorld(World):
